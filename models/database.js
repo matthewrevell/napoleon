@@ -21,7 +21,8 @@ exports.get = function(key, bucket, callback) {
       if (err) {
         callback(err, null);
       } else {
-        callback(null, res);
+        console.log(res);
+        callback(null, res.value);
       }
     });
 }
@@ -38,7 +39,8 @@ exports.upsert = function(key, value, bucket, callback) {
     if(err) {
       callback(err, null);
     } else {
-      callback(null, true);
+      console.log(res);
+      callback(null, res);
     }
   });
 }

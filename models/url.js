@@ -1,6 +1,12 @@
+// url.js: functions related to retrieving, validating and storing
+// shortened URLs. 
+
+
 var database = require('./database.js');
 
-exports.checkURLPortionUniqueness = function(urlPortion, callback) {
+// Private functions
+
+function isShortedUnique(urlPortion, callback) {
   var keyPrefix = 'url';
   var keySeparator = '::';
   var urlKey = keyPrefix + keySeparator + urlPortion;
@@ -23,22 +29,32 @@ exports.checkURLPortionUniqueness = function(urlPortion, callback) {
   });
 }
 
+// Exported functions
+
 exports.save = function (urlDestination, identifier, callback) {
   var keyPrefix = 'url';
-  var keySeparator = '::';
+  var keySeparator = '::'; // XXX: move this and keyPrefix to config.js
   var urlKey = keyPrefix + keySeparator + identifier;
   var doc = 
     { url: urlDestination,
       createdAt: new Date()      
     }
+    
+  // Uniqueness of the shortened URL is a model-level constraint, so we'll
+  // enforce it here in the model.
   
-  database.upsert(urlKey, doc, 'urls', function(err, res) {
+  isShortedUnique(identifier, function(err, res) {
     if (err) {
-      console.log(err);
-      callback (err, null);
+      callback(err, null);
+    } else {
+      database.upsert(urlKey, doc, 'urls', function(err, res) {
+        if (err) {
+          console.log(err);
+          callback (err, null);
+        }
+        console.log(urlKey + ' saved', res);
+        callback(null, res);
+      });  
     }
-    console.log(urlKey + ' saved', res);
-    callback(null, true);
   });
-  
 }
