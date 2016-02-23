@@ -1,5 +1,5 @@
 {
-  "name": "devlink",
+  "name": "stytta",
   "version": "0.0.0",
   "description": "A URL shortener",
   "main": "app.js",

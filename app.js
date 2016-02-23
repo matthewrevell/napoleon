@@ -1,7 +1,8 @@
-var couchbase = require('couchbase');
+var config = require('./config/config.js');
 
-var couchbaseCluster = new couchbase.Cluster('couchbase://localhost');
-var couchbaseBucket = couchbaseCluster.openBucket('urls', 'donkey');
+var database = require('./models/database.js');
+
+var urlsDB = database.urlsDB;
 
 var validCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-';
 
@@ -50,7 +51,7 @@ function checkURLPortionUniqueness(urlPortion, callback) {
   var urlKey = keyPrefix + keySeparator + urlPortion;
   console.log(urlKey);
   
-  couchbaseBucket.get(urlKey, function(err, res) {
+  urlsDB.get(urlKey, function(err, res) {
     if (err) {
       console.log(err);
       console.log(err.code);
@@ -67,22 +68,3 @@ function checkURLPortionUniqueness(urlPortion, callback) {
   });
 }
 
-function saveURL(urlDestination, identifier, callback) {
-  var keyPrefix = 'url';
-  var keySeparator = '::';
-  var urlKey = keyPrefix + keySeparator + identifier;
-  var doc = 
-    { url: urlDestination,
-      createdAt: new Date()      
-    }
-  
-  couchbaseBucket.upsert(urlKey, doc, function(err, res) {
-    if (err) {
-      console.log(err);
-      callback (err, null);
-    }
-    console.log(urlKey + ' saved', res);
-    callback(null, true);
-  });
-  
-}

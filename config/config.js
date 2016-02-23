@@ -1,9 +1,14 @@
 var config = {
   site: {
-    siteURL: 'devl.ink'
+    siteURL: 'localhost:3000'
+  },
+  general: {
+    validCharacters: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-'
   },
   database: {
-    location: 'couchbase://localhost'
+    location: 'couchbase://localhost',
+    urlsBucket: 'urls',
+    generalBucket: 'sytta'
   }  
 } 
 
