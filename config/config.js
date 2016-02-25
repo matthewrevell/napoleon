@@ -7,8 +7,10 @@ var config = {
   },
   database: {
     location: 'couchbase://localhost',
+    keySeparator: '::',
     urlsBucket: 'urls',
-    generalBucket: 'sytta'
+    generalBucket: 'sytta',
+    urlKeyPrefix: 'url'
   }  
 } 
 

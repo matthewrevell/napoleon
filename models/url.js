@@ -1,40 +1,21 @@
 // url.js: functions related to retrieving, validating and storing
 // shortened URLs. 
 
-
+var config = require ('../config/config.js');
 var database = require('./database.js');
 
-// Private functions
-
-function isShortedUnique(urlPortion, callback) {
-  var keyPrefix = 'url';
-  var keySeparator = '::';
-  var urlKey = keyPrefix + keySeparator + urlPortion;
-  console.log(urlKey);
-  
-  database.get(urlKey, 'urls', function(err, res) {
-    if (err) {
-      console.log(err);
-      console.log(err.code);
-      if (err.code === 13) {
-        console.log('Unique! in callback');
-        callback (null, true);
-      } else {
-        console.log('Not unique! in callback');
-        callback (null, false);
-      }      
-    } else {
-      callback (err, null);
-    }
-  });
+function generateURLKey(path) {
+  return config.database.urlKeyPrefix + config.database.keySeparator + path;
 }
 
-// Exported functions
-
-exports.save = function (urlDestination, identifier, callback) {
-  var keyPrefix = 'url';
-  var keySeparator = '::'; // XXX: move this and keyPrefix to config.js
-  var urlKey = keyPrefix + keySeparator + identifier;
+function save(urlDestination, path, callback) {
+  console.log('================');
+  console.log('In url.save');  
+  console.log('================');
+  
+  var urlKey = generateURLKey(path);
+  console.log('urlKey: ' + urlKey);
+  
   var doc = 
     { url: urlDestination,
       createdAt: new Date()      
@@ -43,18 +24,51 @@ exports.save = function (urlDestination, identifier, callback) {
   // Uniqueness of the shortened URL is a model-level constraint, so we'll
   // enforce it here in the model.
   
-  isShortedUnique(identifier, function(err, res) {
+  isPathUnique(path, function(err, res) {
     if (err) {
       callback(err, null);
     } else {
-      database.upsert(urlKey, doc, 'urls', function(err, res) {
-        if (err) {
-          console.log(err);
-          callback (err, null);
-        }
-        console.log(urlKey + ' saved', res);
-        callback(null, res);
-      });  
+      if (res === true) {
+        database.upsert(urlKey, doc, 'urls', function(err, res) {
+          if (err) {
+            console.log(err);
+            callback (err, null);
+          }
+          console.log(urlKey + ' saved', res);
+          callback(null, res);
+        });  
+      } else {
+        console.log('Key exists');
+        callback(null, 'Key exists');
+      }     
     }
   });
 }
+
+function isPathUnique(path, callback) {
+  console.log('================');
+  console.log('in isPathUnique');
+  console.log('================');
+  var urlKey = generateURLKey(path);
+  console.log('checking if ' + urlKey + ' is unique');
+  
+  // XXX: replace with database.checkUnique to decouple from Couchbase 
+  //specifics.
+  database.get(urlKey, 'urls', function(err, res) {
+    if (err) {
+      console.log('err: ' + err.code);
+      if (err.code === 13) {
+        console.log(urlKey + ' is unique!');
+        callback (null, true);
+      } else {
+        console.log('Not unique!');
+        callback (null, false);
+      }      
+    } else {
+      callback (err, null);
+    }
+  });
+}
+
+exports.save = save;
+exports.isPathUnique = isPathUnique;

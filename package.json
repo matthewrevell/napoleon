@@ -9,6 +9,7 @@
   "author": "Matthew Revell",
   "license": "Apache-2.0",
   "dependencies": {
+    "async": "^1.5.2",
     "couchbase": "^2.1.3"
   }
 }

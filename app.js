@@ -6,14 +6,23 @@ var config = require('./config/config.js');
 var urls = require('./models/url.js');
 var shorten = require('./libs/url-shortening.js');
 
-var text = shorten.generate(config.general.validCharacters, 6);
-console.log(text);
+var path = '';
 
-urls.save('http://www.understated.co.uk/', text, function(err, res) {
+shorten.generate(config.general.validCharacters, 6, function(err,res) {
   if (err) {
     console.log(err);
   } else {
-    console.log(res);
+      console.log('shortened path: ' + res);
+      path = res;
+      urls.save('http://www.understated.co.uk/', path, function(err, res) {
+      if (err) {
+        console.log(err);
+      } else if (res === 'Key exists') {
+        console.log('Path exists. Cannot save.');
+      } else {
+        console.log('in urls.save anon func and path does not exist res = ' + res);
+      }
+    });
   }
 });
 
